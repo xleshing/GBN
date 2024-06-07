@@ -1,1 +1,12 @@
 /.venv/
+/img.png
+/moonsave.png
+# Ignore IntelliJ IDEA project files
+.idea/*
+# But keep certain directories and files
+!.idea/codestyles
+!.idea/inspectionProfiles
+!.idea/dictionaries
+!.idea/fileTemplates
+!.idea/modules.xml
+*.iml
