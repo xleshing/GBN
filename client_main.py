@@ -34,7 +34,7 @@ def receive_ack():
         for i in range(base, next_seq_num):
             send_packet(packets[i], i)
 
-# 创建封包
+
 packets = []
 with open("img.png", "rb") as imgFile:
     while True:
