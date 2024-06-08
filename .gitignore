@@ -1,6 +1,7 @@
 /.venv/
 /img.png
 /moonsave.png
+/.gitignore
 # Ignore IntelliJ IDEA project files
 .idea/*
 # But keep certain directories and files
