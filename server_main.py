@@ -1,47 +1,50 @@
 import socket
 
-host = '127.0.0.1'  # 伺服器的IP地址
-port = 555
+host = '127.0.0.1'
+port = 5555
 address = (host, port)
 
-socket01 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # 使用UDP
+socket01 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-window_size = 4  # GBN窗口大小
+# GBN
+window_size = 4
 base = 0
-next_seq_num = 0
 expected_seq_num = 0
 
 socket01.bind(address)
-print('啟動Socket')
+print('Socket started')
 
-def receive_data(conn):
+
+def receive_data(conn, filename):
     global base, expected_seq_num
-    while True:
-        data, addr = conn.recvfrom(1024)
-        seq_num = int(data[:3])  # 從封包中提取序列號
-        payload = data[3:]  # 從封包中提取資料
-        print(f"接收到序列號為{seq_num}的封包")
-        if seq_num == expected_seq_num:
-            conn.sendto(str(seq_num).encode(), addr)  # 對已收到的封包發送確認回應
-            expected_seq_num += 1
-            if expected_seq_num == base + window_size:
-                base += window_size
-                print("基準更新為", base)
-        else:
-            print(f"接收到序列號為{seq_num}的封包，但序列號與預期不符。將丟棄。")
+    with open(filename, 'wb') as f:
+        while True:
+            data, addr = conn.recvfrom(1024)
 
-        if payload == b'':  # 檢查是否收到結束傳輸的封包
-            break
+            if data == b'END'.zfill(10):
+                print('Done')
+                break
 
-    print('傳輸結束')
+            seq_num = int(data[:10])  # 提取序號
+            payload = data[10:]  # 提取DATA
+            print(f"Received packet{seq_num}")
 
-print('等待連接...')
+            if seq_num == expected_seq_num:
+                f.write(payload)
+                conn.sendto(str(seq_num).zfill(10).encode(), addr)  # 發送ACK
+                expected_seq_num += 1
+                print(f"Ack packet{seq_num}")
+            else:
+                print(f"Received packet{seq_num}, doesn't match, Ignor")
+
+
+print('Waiting for connection...')
 while True:
-    data, addr = socket01.recvfrom(1024)  # 從客戶端接收請求
-    if data == b'request':
-        print('已連接至', addr)
-        receive_data(socket01)
+    data, addr = socket01.recvfrom(1024)
+    if data == b'request'.zfill(10):
+        print('Connected to', addr)
+        receive_data(socket01, 'received_image.png')
         break
 
 socket01.close()
-print('伺服器已關閉')
+print('Server closed')
