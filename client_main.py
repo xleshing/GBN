@@ -11,7 +11,7 @@ window_size = 4
 base = 0
 next_seq_num = 0
 timeout = 2
-packet_loss_rate = 0.001  # 丢包率
+packet_loss_rate = 0.1  # 丢包率
 
 def send_packet(packet, seq_num):
     if random.random() > packet_loss_rate:  # 模擬丢包
@@ -29,6 +29,10 @@ def receive_ack():
         print(f"Received ACK{ack_num}")
         if base <= ack_num < next_seq_num:
             base = ack_num + 1
+        else:
+            print(f"ACK error, resend packets{base}")
+            for i in range(base, next_seq_num):
+                send_packet(packets[i], i)
     except socket.timeout:
         print(f"Timeout, resend packets{base}")
         for i in range(base, next_seq_num):

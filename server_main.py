@@ -10,13 +10,14 @@ socket01 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 window_size = 4
 base = 0
 expected_seq_num = 0
+send_incorrect_ACK = False
 
 socket01.bind(address)
 print('Socket started')
 
 
 def receive_data(conn, filename):
-    global base, expected_seq_num
+    global base, expected_seq_num, send_incorrect_ACK
     with open(filename, 'wb') as f:
         while True:
             data, addr = conn.recvfrom(1024)
@@ -34,8 +35,12 @@ def receive_data(conn, filename):
                 conn.sendto(str(seq_num).zfill(10).encode(), addr)  # 發送ACK
                 expected_seq_num += 1
                 print(f"Ack packet{seq_num}")
+                send_incorrect_ACK = False
             else:
-                print(f"Received packet{seq_num}, doesn't match, Ignor")
+                if not send_incorrect_ACK:
+                    conn.sendto(str(expected_seq_num - 1).zfill(10).encode(), addr)  # 發送ACK
+                    send_incorrect_ACK = True
+                    print(f"Received packet{seq_num}, doesn't match, resend Ack packet{expected_seq_num - 1}")
 
 
 print('Waiting for connection...')
