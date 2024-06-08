@@ -7,7 +7,7 @@ address = (host, port)
 socket01 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # GBN
-window_size = 4
+window_size = 5
 base = 0
 expected_seq_num = 0
 send_incorrect_ACK = False

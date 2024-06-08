@@ -7,11 +7,11 @@ address = (host, port)
 
 socket02 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # GBN
-window_size = 4
+window_size = 5
 base = 0
 next_seq_num = 0
-timeout = 2
-packet_loss_rate = 0.1  # 丢包率
+timeout = 0.2
+packet_loss_rate = 0.05  # 丢包率
 
 def send_packet(packet, seq_num):
     if random.random() > packet_loss_rate:  # 模擬丢包
