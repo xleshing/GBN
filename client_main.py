@@ -25,7 +25,7 @@ def receive_ack():
     try:
         socket02.settimeout(timeout)
         ack, _ = socket02.recvfrom(1024)
-        ack_num = int(ack.decode())  # 解析ACK中的序号
+        ack_num = int(ack.decode())  # 解析ACK中的序號
         print(f"Received ACK{ack_num}")
         if base <= ack_num < next_seq_num:
             base = ack_num + 1
