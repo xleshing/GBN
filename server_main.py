@@ -43,13 +43,22 @@ def receive_data(conn, filename):
                     print(f"Received packet{seq_num}, doesn't match, resend Ack packet{expected_seq_num - 1}")
 
 
-print('Waiting for connection...')
-while True:
+def getdata():
     data, addr = socket01.recvfrom(1024)
     if data == b'request'.zfill(10):
         print('Connected to', addr)
         receive_data(socket01, 'received_image.png')
+
+
+def main():
+    print('Waiting for connection...')
+    while True:
+        getdata()
         break
 
-socket01.close()
-print('Server closed')
+    socket01.close()
+    print('Server closed')
+
+
+if __name__ == "__main__":
+    main()

@@ -12,6 +12,8 @@ base = 0
 next_seq_num = 0
 timeout = 0.2
 packet_loss_rate = 0.05  # 丢包率
+packets = []
+
 
 def send_packet(packet, seq_num):
     if random.random() > packet_loss_rate:  # 模擬丢包
@@ -19,6 +21,7 @@ def send_packet(packet, seq_num):
         print(f"Sent packet{seq_num}")
     else:
         print(f"Dropped packet{seq_num}")
+
 
 def receive_ack():
     global base, next_seq_num
@@ -39,32 +42,38 @@ def receive_ack():
             send_packet(packets[i], i)
 
 
-packets = []
-with open("img.png", "rb") as imgFile:
-    while True:
-        imgData = imgFile.read(512)
-        if not imgData:
-            break
-        packet = str(next_seq_num).zfill(10).encode() + imgData
-        packets.append(packet)
-        next_seq_num += 1
+def getdata():
+    global next_seq_num, packets
+    with open("img.png", "rb") as imgFile:
+        while True:
+            imgData = imgFile.read(512)
+            if not imgData:
+                break
+            packet = str(next_seq_num).zfill(10).encode() + imgData
+            packets.append(packet)
+            next_seq_num += 1
+    next_seq_num = 0
 
 
-next_seq_num = 0
+def main():
+    global next_seq_num, packets, base
+    getdata()
+
+    send_packet(str("request").encode().zfill(10), "request")
+
+    print('Starting image transfer')
+
+    while base < len(packets):
+        while next_seq_num < base + window_size and next_seq_num < len(packets):
+            send_packet(packets[next_seq_num], next_seq_num)
+            next_seq_num += 1
+        receive_ack()
+
+    send_packet(str("END").encode().zfill(10), "END")
+
+    socket02.close()
+    print('Transfer complete')
 
 
-send_packet(str("request").encode().zfill(10), "request")
-
-
-print('Starting image transfer')
-while base < len(packets):
-    while next_seq_num < base + window_size and next_seq_num < len(packets):
-        send_packet(packets[next_seq_num], next_seq_num)
-        next_seq_num += 1
-    receive_ack()
-
-
-send_packet(str("END").encode().zfill(10), "END")
-
-socket02.close()
-print('Transfer complete')
+if __name__ == "__main__":
+    main()
